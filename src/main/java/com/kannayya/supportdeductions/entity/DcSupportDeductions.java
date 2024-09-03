@@ -55,4 +55,10 @@ public class DcSupportDeductions {
 
     @Column(name = "update_dt") // Timestamp without time zone
     private Date updateDt;
+
+   public DcSupportDeductions(long sprtSeqNum,long indvId, String name){
+       this.sprtSeqNum = sprtSeqNum;
+       this.indvId=indvId;
+       this.name = name;
+   }
 }

@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
+import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -35,7 +36,7 @@ public class DcSupportDeductionsControllerTest {
 
     @Test
     public void testGetAllDeductions() {
-        DcSupportDeductionsResponseDTO dto = new DcSupportDeductionsResponseDTO(1L, "John Doe", 1000.00);
+        DcSupportDeductionsResponseDTO dto = new DcSupportDeductionsResponseDTO(1L, "John Doe", BigDecimal.valueOf(1000.00));
         when(service.findAll()).thenReturn(Collections.singletonList(dto));
 
         ResponseEntity<List<DcSupportDeductionsResponseDTO>> response = controller.getAllDeductions();
@@ -48,7 +49,7 @@ public class DcSupportDeductionsControllerTest {
 
     @Test
     public void testGetDeductionByIdSuccess() {
-        DcSupportDeductions deduction = new DcSupportDeductions(1L, 1L, "John Doe", null, null, null, null, null, null, null, null, null);
+        DcSupportDeductions deduction = new DcSupportDeductions(1L, 1L, "John Doe");
         when(service.findById(1L)).thenReturn(Optional.of(deduction));
 
         ResponseEntity<Object> response = controller.getDeductionById(1L);
@@ -70,7 +71,7 @@ public class DcSupportDeductionsControllerTest {
 
     @Test
     public void testCreateDeduction() {
-        DcSupportDeductions deduction = new DcSupportDeductions(1L, 1L, "John Doe", null, null, null, null, null, null, null, null, null);
+        DcSupportDeductions deduction = new DcSupportDeductions(1L, 1L, "John Doe");
         when(service.save(any(DcSupportDeductions.class))).thenReturn(deduction);
 
         ResponseEntity<String> response = controller.createDeduction(deduction);
@@ -81,8 +82,8 @@ public class DcSupportDeductionsControllerTest {
 
     @Test
     public void testUpdateDeductionSuccess() {
-        DcSupportDeductions existingDeduction = new DcSupportDeductions(1L, 1L, "John Doe", null, null, null, null, null, null, null, null, null);
-        DcSupportDeductions updatedDeduction = new DcSupportDeductions(1L, 1L, "Jane Doe", null, null, null, null, null, null, null, null, null);
+        DcSupportDeductions existingDeduction = new DcSupportDeductions(1L, 1L, "John Doe");
+        DcSupportDeductions updatedDeduction = new DcSupportDeductions(1L, 1L, "Jane Doe");
         when(service.findById(1L)).thenReturn(Optional.of(existingDeduction));
         when(service.save(any(DcSupportDeductions.class))).thenReturn(updatedDeduction);
 
@@ -94,7 +95,7 @@ public class DcSupportDeductionsControllerTest {
 
     @Test
     public void testUpdateDeductionNotFound() {
-        DcSupportDeductions updatedDeduction = new DcSupportDeductions(1L, 1L, "Jane Doe", null, null, null, null, null, null, null, null, null);
+        DcSupportDeductions updatedDeduction = new DcSupportDeductions(1L, 1L, "Jane Doe");
         when(service.findById(1L)).thenReturn(Optional.empty());
 
         ResourceNotFoundException thrown = assertThrows(ResourceNotFoundException.class, () -> {
@@ -106,7 +107,7 @@ public class DcSupportDeductionsControllerTest {
 
     @Test
     public void testDeleteDeductionSuccess() {
-        DcSupportDeductions deduction = new DcSupportDeductions(1L, 1L, "John Doe", null, null, null, null, null, null, null, null, null);
+        DcSupportDeductions deduction = new DcSupportDeductions(1L, 1L, "John Doe");
         when(service.findById(1L)).thenReturn(Optional.of(deduction));
 
         ResponseEntity<String> response = controller.deleteDeduction(1L);
