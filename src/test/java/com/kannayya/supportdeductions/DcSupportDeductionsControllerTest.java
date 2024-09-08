@@ -1,10 +1,10 @@
 package com.kannayya.supportdeductions;
 
 import com.kannayya.supportdeductions.controller.DcSupportDeductionsController;
-import com.kannayya.supportdeductions.dto.DcSupportDeductionsResponseDTO;
+import com.kannayya.supportdeductions.dto.DcSupportDeductionsGetAllDTO;
 import com.kannayya.supportdeductions.entity.DcSupportDeductions;
 import com.kannayya.supportdeductions.exceptions.ResourceNotFoundException;
-import com.kannayya.supportdeductions.service.DcSupportDeductionsService;
+import com.kannayya.supportdeductions.service.DcSupportDeductionsServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -25,7 +25,7 @@ import static org.mockito.Mockito.*;
 public class DcSupportDeductionsControllerTest {
 
     @Mock
-    private DcSupportDeductionsService service;
+    private DcSupportDeductionsServiceImpl service;
 
     @InjectMocks
     private DcSupportDeductionsController controller;
@@ -36,10 +36,10 @@ public class DcSupportDeductionsControllerTest {
 
     @Test
     public void testGetAllDeductions() {
-        DcSupportDeductionsResponseDTO dto = new DcSupportDeductionsResponseDTO(1L, "John Doe", BigDecimal.valueOf(1000.00));
+        DcSupportDeductionsGetAllDTO dto = new DcSupportDeductionsGetAllDTO(1L, "John Doe", BigDecimal.valueOf(1000.00));
         when(service.findAll()).thenReturn(Collections.singletonList(dto));
 
-        ResponseEntity<List<DcSupportDeductionsResponseDTO>> response = controller.getAllDeductions();
+        ResponseEntity<List<DcSupportDeductionsGetAllDTO>> response = controller.getAllDeductions();
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());

@@ -1,9 +1,9 @@
 package com.kannayya.supportdeductions;
 
-import com.kannayya.supportdeductions.dto.DcSupportDeductionsResponseDTO;
+import com.kannayya.supportdeductions.dto.DcSupportDeductionsGetAllDTO;
 import com.kannayya.supportdeductions.entity.DcSupportDeductions;
 import com.kannayya.supportdeductions.repository.DcSupportDeductionsRepository;
-import com.kannayya.supportdeductions.service.DcSupportDeductionsService;
+import com.kannayya.supportdeductions.service.DcSupportDeductionsServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -17,13 +17,13 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-public class DcSupportDeductionsServiceTest {
+public class DcSupportDeductionsServiceImplTest {
 
     @Mock
     private DcSupportDeductionsRepository repository;
 
     @InjectMocks
-    private DcSupportDeductionsService service;
+    private DcSupportDeductionsServiceImpl service;
 
     @BeforeEach
     public void setUp() {
@@ -37,7 +37,7 @@ public class DcSupportDeductionsServiceTest {
 
         when(repository.findAll()).thenReturn(Arrays.asList(deduction1, deduction2));
 
-        List<DcSupportDeductionsResponseDTO> result = service.findAll();
+        List<DcSupportDeductionsGetAllDTO> result = service.findAll();
 
         assertEquals(2, result.size());
         assertEquals("John Doe", result.get(0).getName());

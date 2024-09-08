@@ -1,11 +1,12 @@
 package com.kannayya.supportdeductions.controller;
 
+import com.kannayya.supportdeductions.dto.DcSupportDeductionsGetAllDTO;
+import com.kannayya.supportdeductions.dto.DcSupportDeductionsRequestDTO;
 import com.kannayya.supportdeductions.dto.DcSupportDeductionsResponseDTO;
 import com.kannayya.supportdeductions.entity.DcSupportDeductions;
-import com.kannayya.supportdeductions.exceptions.ResourceNotFoundException;
 import com.kannayya.supportdeductions.service.DcSupportDeductionsService;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,50 +21,38 @@ public class DcSupportDeductionsController {
     private DcSupportDeductionsService service;
 
     @GetMapping
-    public ResponseEntity<List<DcSupportDeductionsResponseDTO>> getAllDeductions() {
-        List<DcSupportDeductionsResponseDTO> deductions = service.findAll();
-        return new ResponseEntity<>(deductions, HttpStatus.OK);
+    public List<DcSupportDeductionsGetAllDTO> getAllDeductions() {
+        return service.findAll();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Object> getDeductionById(@PathVariable Long id) {
-        Optional<DcSupportDeductions> deductionOpt = service.findById(id);
-        if (deductionOpt.isPresent()) {
-            return new ResponseEntity<>(deductionOpt.get(), HttpStatus.OK);
-        } else {
-            throw new ResourceNotFoundException("Deduction not found with ID: " + id);
-        }
+    public ResponseEntity<DcSupportDeductionsResponseDTO> getDeductionById(@PathVariable Long id) {
+        Optional<DcSupportDeductionsResponseDTO> responseDTO = service.findById(id);
+        return responseDTO.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public ResponseEntity<String> createDeduction(@RequestBody DcSupportDeductions deduction) {
-        DcSupportDeductions savedDeduction = service.save(deduction);
-        return new ResponseEntity<>("Deduction created successfully with ID: " + savedDeduction.getSprtSeqNum(), HttpStatus.CREATED);
+    public ResponseEntity<DcSupportDeductionsResponseDTO> createDeduction(@RequestBody DcSupportDeductionsRequestDTO requestDTO) {
+        DcSupportDeductionsResponseDTO responseDTO = service.save(requestDTO);
+        return ResponseEntity.ok(responseDTO);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Object> updateDeduction(@PathVariable Long id, @RequestBody DcSupportDeductions deduction) {
-        Optional<DcSupportDeductions> existingDeductionOpt = service.findById(id);
 
-        if (existingDeductionOpt.isPresent()) {
-            DcSupportDeductions existingDeduction = existingDeductionOpt.get();
-            deduction.setSprtSeqNum(existingDeduction.getSprtSeqNum()); // Ensure ID is not changed
-            DcSupportDeductions updatedDeduction = service.save(deduction);
-            return new ResponseEntity<>(updatedDeduction, HttpStatus.OK);
+    @PutMapping("/{id}")
+    public ResponseEntity<DcSupportDeductionsResponseDTO> updateDeduction(@PathVariable Long id, @RequestBody DcSupportDeductionsRequestDTO requestDTO) {
+        DcSupportDeductionsResponseDTO responseDTO = service.update(id, requestDTO);
+        if (responseDTO != null) {
+            return ResponseEntity.ok(responseDTO);
         } else {
-            throw new ResourceNotFoundException("Deduction not found with ID: " + id);
+            return ResponseEntity.notFound().build();
         }
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteDeduction(@PathVariable Long id) {
-        Optional<DcSupportDeductions> existingDeductionOpt = service.findById(id);
-
-        if (existingDeductionOpt.isPresent()) {
-            service.deleteById(id);
-            return new ResponseEntity<>("Deduction deleted successfully with ID: " + id, HttpStatus.OK);
-        } else {
-            throw new ResourceNotFoundException("Deduction not found with ID: " + id);
-        }
+    public ResponseEntity<Void> deleteDeduction(@PathVariable Long id) {
+        service.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
+
+
 }
