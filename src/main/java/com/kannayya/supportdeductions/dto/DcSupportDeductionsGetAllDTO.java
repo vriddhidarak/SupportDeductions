@@ -19,6 +19,13 @@ public class DcSupportDeductionsGetAllDTO {
     private String name;
     private BigDecimal monthlyActualAmt;
 
+    public DcSupportDeductionsGetAllDTO(long l, long l1, String janeDoe) {
+        this.sprtSeqNum = l;
+        this.monthlyActualAmt = new BigDecimal(l1);
+        this.name = janeDoe;
+
+    }
+
     public static DcSupportDeductionsGetAllDTO fromEntity(DcSupportDeductions entity, LocalDateTime requestTimeStamp, LocalDateTime responseTimeStamp) {
         return new DcSupportDeductionsGetAllDTO(
             requestTimeStamp,

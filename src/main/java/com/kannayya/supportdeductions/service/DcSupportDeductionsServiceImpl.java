@@ -16,8 +16,13 @@ import java.util.Optional;
 @Service
 public class DcSupportDeductionsServiceImpl implements DcSupportDeductionsService {
 
+
+    private final DcSupportDeductionsRepository repository;
+
     @Autowired
-    private DcSupportDeductionsRepository repository;
+    public DcSupportDeductionsServiceImpl(DcSupportDeductionsRepository repository) {
+        this.repository = repository;
+    }
 
     public List<DcSupportDeductionsGetAllDTO> findAll() {
         LocalDateTime requestTimeStamp = LocalDateTime.now();

@@ -2,7 +2,8 @@ package com.kannayya.supportdeductions;
 
 import com.kannayya.supportdeductions.controller.DcSupportDeductionsController;
 import com.kannayya.supportdeductions.dto.DcSupportDeductionsGetAllDTO;
-import com.kannayya.supportdeductions.entity.DcSupportDeductions;
+import com.kannayya.supportdeductions.dto.DcSupportDeductionsRequestDTO;
+import com.kannayya.supportdeductions.dto.DcSupportDeductionsResponseDTO;
 import com.kannayya.supportdeductions.exceptions.ResourceNotFoundException;
 import com.kannayya.supportdeductions.service.DcSupportDeductionsServiceImpl;
 import org.junit.jupiter.api.Test;
@@ -14,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -22,7 +24,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @SpringJUnitConfig
-public class DcSupportDeductionsControllerTest {
+ class DcSupportDeductionsControllerTest {
 
     @Mock
     private DcSupportDeductionsServiceImpl service;
@@ -35,8 +37,9 @@ public class DcSupportDeductionsControllerTest {
     }
 
     @Test
-    public void testGetAllDeductions() {
-        DcSupportDeductionsGetAllDTO dto = new DcSupportDeductionsGetAllDTO(1L, "John Doe", BigDecimal.valueOf(1000.00));
+    void testGetAllDeductions() {
+        LocalDateTime now = LocalDateTime.now();
+        DcSupportDeductionsGetAllDTO dto = new DcSupportDeductionsGetAllDTO(now, now, 1L, "John Doe", BigDecimal.valueOf(1000.00));
         when(service.findAll()).thenReturn(Collections.singletonList(dto));
 
         ResponseEntity<List<DcSupportDeductionsGetAllDTO>> response = controller.getAllDeductions();
@@ -48,18 +51,19 @@ public class DcSupportDeductionsControllerTest {
     }
 
     @Test
-    public void testGetDeductionByIdSuccess() {
-        DcSupportDeductions deduction = new DcSupportDeductions(1L, 1L, "John Doe");
-        when(service.findById(1L)).thenReturn(Optional.of(deduction));
+    void testGetDeductionByIdSuccess() {
+        LocalDateTime now = LocalDateTime.now();
+        DcSupportDeductionsResponseDTO dto = new DcSupportDeductionsResponseDTO(now, now, 1L, "John Doe", BigDecimal.valueOf(1000.00));
+        when(service.findById(1L)).thenReturn(Optional.of(dto));
 
-        ResponseEntity<Object> response = controller.getDeductionById(1L);
+        ResponseEntity<DcSupportDeductionsResponseDTO> response = controller.getDeductionById(1L);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(deduction, response.getBody());
+        assertEquals(dto, response.getBody());
     }
 
     @Test
-    public void testGetDeductionByIdNotFound() {
+    void testGetDeductionByIdNotFound() {
         when(service.findById(1L)).thenReturn(Optional.empty());
 
         ResourceNotFoundException thrown = assertThrows(ResourceNotFoundException.class, () -> {
@@ -70,55 +74,56 @@ public class DcSupportDeductionsControllerTest {
     }
 
     @Test
-    public void testCreateDeduction() {
-        DcSupportDeductions deduction = new DcSupportDeductions(1L, 1L, "John Doe");
-        when(service.save(any(DcSupportDeductions.class))).thenReturn(deduction);
+    void testCreateDeduction() {
+        LocalDateTime now = LocalDateTime.now();
+        DcSupportDeductionsRequestDTO requestDTO = new DcSupportDeductionsRequestDTO("John Doe", BigDecimal.valueOf(1000.00));
+        DcSupportDeductionsResponseDTO responseDTO = new DcSupportDeductionsResponseDTO(now, now, 1L, "John Doe", BigDecimal.valueOf(1000.00));
+        when(service.save(any(DcSupportDeductionsRequestDTO.class))).thenReturn(responseDTO);
 
-        ResponseEntity<String> response = controller.createDeduction(deduction);
+        ResponseEntity<DcSupportDeductionsResponseDTO> response = controller.createDeduction(requestDTO);
 
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
-        assertEquals("Deduction created successfully with ID: 1", response.getBody());
+        assertEquals(responseDTO, response.getBody());
     }
 
     @Test
-    public void testUpdateDeductionSuccess() {
-        DcSupportDeductions existingDeduction = new DcSupportDeductions(1L, 1L, "John Doe");
-        DcSupportDeductions updatedDeduction = new DcSupportDeductions(1L, 1L, "Jane Doe");
-        when(service.findById(1L)).thenReturn(Optional.of(existingDeduction));
-        when(service.save(any(DcSupportDeductions.class))).thenReturn(updatedDeduction);
+    void testUpdateDeductionSuccess() {
+        LocalDateTime now = LocalDateTime.now();
+        DcSupportDeductionsRequestDTO requestDTO = new DcSupportDeductionsRequestDTO("Jane Doe", BigDecimal.valueOf(2000.00));
+        DcSupportDeductionsResponseDTO responseDTO = new DcSupportDeductionsResponseDTO(now, now, 1L, "Jane Doe", BigDecimal.valueOf(2000.00));
+        when(service.update(eq(1L), any(DcSupportDeductionsRequestDTO.class))).thenReturn(responseDTO);
 
-        ResponseEntity<Object> response = controller.updateDeduction(1L, updatedDeduction);
+        ResponseEntity<DcSupportDeductionsResponseDTO> response = controller.updateDeduction(1L, requestDTO);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(updatedDeduction, response.getBody());
+        assertEquals(responseDTO, response.getBody());
     }
 
     @Test
-    public void testUpdateDeductionNotFound() {
-        DcSupportDeductions updatedDeduction = new DcSupportDeductions(1L, 1L, "Jane Doe");
-        when(service.findById(1L)).thenReturn(Optional.empty());
+   void testUpdateDeductionNotFound() {
+        DcSupportDeductionsRequestDTO requestDTO = new DcSupportDeductionsRequestDTO("Jane Doe", BigDecimal.valueOf(2000.00));
+        when(service.update(eq(1L), any(DcSupportDeductionsRequestDTO.class))).thenThrow(new ResourceNotFoundException("Deduction not found with ID: 1"));
 
         ResourceNotFoundException thrown = assertThrows(ResourceNotFoundException.class, () -> {
-            controller.updateDeduction(1L, updatedDeduction);
+            controller.updateDeduction(1L, requestDTO);
         });
 
         assertEquals("Deduction not found with ID: 1", thrown.getMessage());
     }
 
     @Test
-    public void testDeleteDeductionSuccess() {
-        DcSupportDeductions deduction = new DcSupportDeductions(1L, 1L, "John Doe");
-        when(service.findById(1L)).thenReturn(Optional.of(deduction));
+    void testDeleteDeductionSuccess() {
+        doNothing().when(service).deleteById(1L);
 
-        ResponseEntity<String> response = controller.deleteDeduction(1L);
+        ResponseEntity<Void> response = controller.deleteDeduction(1L);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals("Deduction deleted successfully with ID: 1", response.getBody());
     }
 
     @Test
-    public void testDeleteDeductionNotFound() {
-        when(service.findById(1L)).thenReturn(Optional.empty());
+    void testDeleteDeductionNotFound() {
+        doThrow(new ResourceNotFoundException("Deduction not found with ID: 1")).when(service).deleteById(1L);
 
         ResourceNotFoundException thrown = assertThrows(ResourceNotFoundException.class, () -> {
             controller.deleteDeduction(1L);
@@ -127,4 +132,3 @@ public class DcSupportDeductionsControllerTest {
         assertEquals("Deduction not found with ID: 1", thrown.getMessage());
     }
 }
-

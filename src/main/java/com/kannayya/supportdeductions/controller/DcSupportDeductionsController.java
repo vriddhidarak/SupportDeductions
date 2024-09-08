@@ -3,10 +3,10 @@ package com.kannayya.supportdeductions.controller;
 import com.kannayya.supportdeductions.dto.DcSupportDeductionsGetAllDTO;
 import com.kannayya.supportdeductions.dto.DcSupportDeductionsRequestDTO;
 import com.kannayya.supportdeductions.dto.DcSupportDeductionsResponseDTO;
-import com.kannayya.supportdeductions.entity.DcSupportDeductions;
 import com.kannayya.supportdeductions.service.DcSupportDeductionsService;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,12 +17,18 @@ import java.util.Optional;
 @RequestMapping("/api/deductions")
 public class DcSupportDeductionsController {
 
+
+    private final DcSupportDeductionsService service;
+
     @Autowired
-    private DcSupportDeductionsService service;
+    public DcSupportDeductionsController(DcSupportDeductionsService service) {
+        this.service = service;
+    }
 
     @GetMapping
-    public List<DcSupportDeductionsGetAllDTO> getAllDeductions() {
-        return service.findAll();
+    public ResponseEntity<List<DcSupportDeductionsGetAllDTO>> getAllDeductions() {
+        List<DcSupportDeductionsGetAllDTO> response = service.findAll();
+        return new ResponseEntity<>(response, response.isEmpty() ? HttpStatus.NO_CONTENT : HttpStatus.OK);
     }
 
     @GetMapping("/{id}")

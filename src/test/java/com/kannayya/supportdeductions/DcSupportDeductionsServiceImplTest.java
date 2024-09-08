@@ -1,6 +1,8 @@
 package com.kannayya.supportdeductions;
 
 import com.kannayya.supportdeductions.dto.DcSupportDeductionsGetAllDTO;
+import com.kannayya.supportdeductions.dto.DcSupportDeductionsRequestDTO;
+import com.kannayya.supportdeductions.dto.DcSupportDeductionsResponseDTO;
 import com.kannayya.supportdeductions.entity.DcSupportDeductions;
 import com.kannayya.supportdeductions.repository.DcSupportDeductionsRepository;
 import com.kannayya.supportdeductions.service.DcSupportDeductionsServiceImpl;
@@ -10,14 +12,16 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Arrays;
-import java.util.Optional;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-public class DcSupportDeductionsServiceImplTest {
+class DcSupportDeductionsServiceImplTest {
 
     @Mock
     private DcSupportDeductionsRepository repository;
@@ -31,11 +35,15 @@ public class DcSupportDeductionsServiceImplTest {
     }
 
     @Test
-    public void testFindAll() {
-        DcSupportDeductions deduction1 = new DcSupportDeductions(1L, 1L, "John Doe");
-        DcSupportDeductions deduction2 = new DcSupportDeductions(2L, 2L, "Jane Doe");
+   void testFindAll() {
+        DcSupportDeductions entity1 = new DcSupportDeductions();
+        DcSupportDeductions entity2 = new DcSupportDeductions();
+        DcSupportDeductionsGetAllDTO deduction1 = new DcSupportDeductionsGetAllDTO(1L, 1L, "John Doe");
+        DcSupportDeductionsGetAllDTO deduction2 = new DcSupportDeductionsGetAllDTO(2L, 2L, "Jane Doe");
 
-        when(repository.findAll()).thenReturn(Arrays.asList(deduction1, deduction2));
+        when(repository.findAll()).thenReturn(Arrays.asList(entity1, entity2));
+        when(DcSupportDeductionsGetAllDTO.fromEntity(entity1, LocalDateTime.now(), LocalDateTime.now())).thenReturn(deduction1);
+        when(DcSupportDeductionsGetAllDTO.fromEntity(entity2, LocalDateTime.now(), LocalDateTime.now())).thenReturn(deduction2);
 
         List<DcSupportDeductionsGetAllDTO> result = service.findAll();
 
@@ -45,40 +53,47 @@ public class DcSupportDeductionsServiceImplTest {
     }
 
     @Test
-    public void testFindByIdSuccess() {
-        DcSupportDeductions deduction = new DcSupportDeductions(1L, 1L, "John Doe");
+    void testFindByIdSuccess() {
+        DcSupportDeductions entity = new DcSupportDeductions();
+        DcSupportDeductionsResponseDTO deduction = new DcSupportDeductionsResponseDTO(LocalDateTime.now(), LocalDateTime.now(), 1L, "John Doe", BigDecimal.ZERO);
 
-        when(repository.findById(1L)).thenReturn(Optional.of(deduction));
+        when(repository.findById(1L)).thenReturn(Optional.of(entity));
+        when(DcSupportDeductionsResponseDTO.fromEntity(entity, LocalDateTime.now(), LocalDateTime.now())).thenReturn(deduction);
 
-        Optional<DcSupportDeductions> result = service.findById(1L);
+        Optional<DcSupportDeductionsResponseDTO> result = service.findById(1L);
 
         assertTrue(result.isPresent());
         assertEquals("John Doe", result.get().getName());
     }
 
     @Test
-    public void testFindByIdNotFound() {
+    void testFindByIdNotFound() {
         when(repository.findById(1L)).thenReturn(Optional.empty());
 
-        Optional<DcSupportDeductions> result = service.findById(1L);
+        Optional<DcSupportDeductionsResponseDTO> result = service.findById(1L);
 
         assertFalse(result.isPresent());
     }
 
     @Test
-    public void testSave() {
-        DcSupportDeductions deduction = new DcSupportDeductions(1L, 1L, "John Doe");
+    void testSave() {
+        DcSupportDeductionsRequestDTO request = new DcSupportDeductionsRequestDTO();
+        DcSupportDeductions entity = new DcSupportDeductions();
+        DcSupportDeductions savedEntity = new DcSupportDeductions();
+        DcSupportDeductionsResponseDTO response = new DcSupportDeductionsResponseDTO(LocalDateTime.now(), LocalDateTime.now(), 1L, "John Doe", BigDecimal.ZERO);
 
-        when(repository.save(deduction)).thenReturn(deduction);
+        when(request.toEntity()).thenReturn(entity);
+        when(repository.save(entity)).thenReturn(savedEntity);
+        when(DcSupportDeductionsResponseDTO.fromEntity(savedEntity, LocalDateTime.now(), LocalDateTime.now())).thenReturn(response);
 
-        DcSupportDeductions result = service.save(deduction);
+        DcSupportDeductionsResponseDTO result = service.save(request);
 
         assertEquals("John Doe", result.getName());
-        verify(repository, times(1)).save(deduction);
+        verify(repository, times(1)).save(entity);
     }
 
     @Test
-    public void testDeleteById() {
+   void testDeleteById() {
         Long id = 1L;
 
         service.deleteById(id);

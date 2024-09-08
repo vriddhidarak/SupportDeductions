@@ -3,7 +3,6 @@ package com.kannayya.supportdeductions.service;
 import com.kannayya.supportdeductions.dto.DcSupportDeductionsGetAllDTO;
 import com.kannayya.supportdeductions.dto.DcSupportDeductionsRequestDTO;
 import com.kannayya.supportdeductions.dto.DcSupportDeductionsResponseDTO;
-import com.kannayya.supportdeductions.entity.DcSupportDeductions;
 
 import java.util.List;
 import java.util.Optional;

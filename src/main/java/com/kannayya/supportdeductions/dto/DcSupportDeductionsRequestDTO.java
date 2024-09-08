@@ -37,7 +37,12 @@ public class DcSupportDeductionsRequestDTO {
 
     private Date updateDt;
 
-  public DcSupportDeductions toEntity() {
+    public DcSupportDeductionsRequestDTO(String janeDoe, BigDecimal bigDecimal) {
+        this.name = janeDoe;
+        this.monthlyActualAmt = bigDecimal;
+    }
+
+    public DcSupportDeductions toEntity() {
         DcSupportDeductionsRequestDTO dto = this;
         DcSupportDeductions entity = new DcSupportDeductions();
         entity.setIndvId(dto.getIndvId());

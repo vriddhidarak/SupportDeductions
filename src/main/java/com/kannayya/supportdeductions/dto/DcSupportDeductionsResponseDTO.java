@@ -42,6 +42,15 @@ public class DcSupportDeductionsResponseDTO {
 
     private Date updateDt;
 
+    public DcSupportDeductionsResponseDTO(LocalDateTime now, LocalDateTime now1, long l, String janeDoe, BigDecimal bigDecimal) {
+        this.requestTimeStamp = now;
+        this.responseTimeStamp = now1;
+        this.sprtSeqNum = l;
+        this.name = janeDoe;
+        this.monthlyActualAmt = bigDecimal;
+    }
+
+
     public static DcSupportDeductionsResponseDTO fromEntity(DcSupportDeductions entity, LocalDateTime requestTimeStamp, LocalDateTime responseTimeStamp) {
         return new DcSupportDeductionsResponseDTO(
             requestTimeStamp,
