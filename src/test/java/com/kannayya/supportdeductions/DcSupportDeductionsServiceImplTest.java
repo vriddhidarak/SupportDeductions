@@ -1,5 +1,4 @@
 package com.kannayya.supportdeductions;
-
 import com.kannayya.supportdeductions.dto.DcSupportDeductionsGetAllDTO;
 import com.kannayya.supportdeductions.dto.DcSupportDeductionsRequestDTO;
 import com.kannayya.supportdeductions.dto.DcSupportDeductionsResponseDTO;
@@ -14,14 +13,12 @@ import org.mockito.MockitoAnnotations;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-class DcSupportDeductionsServiceImplTest {
+public class DcSupportDeductionsServiceImplTest {
 
     @Mock
     private DcSupportDeductionsRepository repository;
@@ -30,74 +27,115 @@ class DcSupportDeductionsServiceImplTest {
     private DcSupportDeductionsServiceImpl service;
 
     @BeforeEach
-    public void setUp() {
+    public void setup() {
         MockitoAnnotations.openMocks(this);
     }
 
     @Test
-   void testFindAll() {
-        DcSupportDeductions entity1 = new DcSupportDeductions();
-        DcSupportDeductions entity2 = new DcSupportDeductions();
-        DcSupportDeductionsGetAllDTO deduction1 = new DcSupportDeductionsGetAllDTO(1L, 1L, "John Doe");
-        DcSupportDeductionsGetAllDTO deduction2 = new DcSupportDeductionsGetAllDTO(2L, 2L, "Jane Doe");
+    public void testFindAll() {
+        List<DcSupportDeductions> deductionsList = Arrays.asList(
+                new DcSupportDeductions(1L, 101L, "John Doe", new Date(), new Date(), new Date(), new Date(), "EXP001", new BigDecimal("500"), "Verified", new Date(), new Date(), new Date()),
+                new DcSupportDeductions(2L, 102L, "Jane Doe", new Date(), new Date(), new Date(), new Date(), "EXP002", new BigDecimal("600"), "Verified", new Date(), new Date(), new Date())
+        );
 
-        when(repository.findAll()).thenReturn(Arrays.asList(entity1, entity2));
-        when(DcSupportDeductionsGetAllDTO.fromEntity(entity1, LocalDateTime.now(), LocalDateTime.now())).thenReturn(deduction1);
-        when(DcSupportDeductionsGetAllDTO.fromEntity(entity2, LocalDateTime.now(), LocalDateTime.now())).thenReturn(deduction2);
+        when(repository.findAll()).thenReturn(deductionsList);
 
         List<DcSupportDeductionsGetAllDTO> result = service.findAll();
 
         assertEquals(2, result.size());
         assertEquals("John Doe", result.get(0).getName());
+        assertEquals(new BigDecimal("500"), result.get(0).getMonthlyActualAmt());
         assertEquals("Jane Doe", result.get(1).getName());
+
+        verify(repository, times(1)).findAll();
     }
 
     @Test
-    void testFindByIdSuccess() {
-        DcSupportDeductions entity = new DcSupportDeductions();
-        DcSupportDeductionsResponseDTO deduction = new DcSupportDeductionsResponseDTO(LocalDateTime.now(), LocalDateTime.now(), 1L, "John Doe", BigDecimal.ZERO);
+    public void testFindById_Found() {
+        DcSupportDeductions entity = new DcSupportDeductions(1L, 101L, "John Doe", new Date(), new Date(), new Date(), new Date(), "EXP001", new BigDecimal("500"), "Verified", new Date(), new Date(), new Date());
 
         when(repository.findById(1L)).thenReturn(Optional.of(entity));
-        when(DcSupportDeductionsResponseDTO.fromEntity(entity, LocalDateTime.now(), LocalDateTime.now())).thenReturn(deduction);
 
         Optional<DcSupportDeductionsResponseDTO> result = service.findById(1L);
 
         assertTrue(result.isPresent());
         assertEquals("John Doe", result.get().getName());
+        assertEquals(new BigDecimal("500"), result.get().getMonthlyActualAmt());
+
+        verify(repository, times(1)).findById(1L);
     }
 
     @Test
-    void testFindByIdNotFound() {
+    public void testFindById_NotFound() {
         when(repository.findById(1L)).thenReturn(Optional.empty());
 
         Optional<DcSupportDeductionsResponseDTO> result = service.findById(1L);
 
         assertFalse(result.isPresent());
+        verify(repository, times(1)).findById(1L);
     }
 
     @Test
-    void testSave() {
-        DcSupportDeductionsRequestDTO request = new DcSupportDeductionsRequestDTO();
-        DcSupportDeductions entity = new DcSupportDeductions();
-        DcSupportDeductions savedEntity = new DcSupportDeductions();
-        DcSupportDeductionsResponseDTO response = new DcSupportDeductionsResponseDTO(LocalDateTime.now(), LocalDateTime.now(), 1L, "John Doe", BigDecimal.ZERO);
+    public void testSave() {
+        DcSupportDeductionsRequestDTO requestDTO = new DcSupportDeductionsRequestDTO(
+                101L, "John Doe", new Date(), new Date(), new Date(), new Date(), "EXP001",
+                new BigDecimal("500"), "Verified", new Date(), new Date(), new Date());
+        DcSupportDeductions entity = requestDTO.toEntity();
 
-        when(request.toEntity()).thenReturn(entity);
-        when(repository.save(entity)).thenReturn(savedEntity);
-        when(DcSupportDeductionsResponseDTO.fromEntity(savedEntity, LocalDateTime.now(), LocalDateTime.now())).thenReturn(response);
+        DcSupportDeductions savedEntity = new DcSupportDeductions(1L, 101L, "John Doe", new Date(), new Date(), new Date(), new Date(), "EXP001", new BigDecimal("500"), "Verified", new Date(), new Date(), new Date());
 
-        DcSupportDeductionsResponseDTO result = service.save(request);
+        when(repository.save(any(DcSupportDeductions.class))).thenReturn(savedEntity);
 
+        DcSupportDeductionsResponseDTO result = service.save(requestDTO);
+
+        assertNotNull(result);
         assertEquals("John Doe", result.getName());
-        verify(repository, times(1)).save(entity);
+        assertEquals(new BigDecimal("500"), result.getMonthlyActualAmt());
+
+        verify(repository, times(1)).save(any(DcSupportDeductions.class));
     }
 
     @Test
-   void testDeleteById() {
-        Long id = 1L;
+    public void testUpdate_Success() {
+        DcSupportDeductionsRequestDTO requestDTO = new DcSupportDeductionsRequestDTO(
+                101L, "John Doe", new Date(), new Date(), new Date(), new Date(), "EXP001",
+                new BigDecimal("500"), "Verified", new Date(), new Date(), new Date());
+        DcSupportDeductions entity = new DcSupportDeductions(1L, 101L, "John Doe", new Date(), new Date(), new Date(), new Date(), "EXP001", new BigDecimal("500"), "Verified", new Date(), new Date(), new Date());
 
-        service.deleteById(id);
+        when(repository.findById(1L)).thenReturn(Optional.of(entity));
+        when(repository.save(any(DcSupportDeductions.class))).thenReturn(entity);
 
-        verify(repository, times(1)).deleteById(id);
+        DcSupportDeductionsResponseDTO result = service.update(1L, requestDTO);
+
+        assertNotNull(result);
+        assertEquals("John Doe", result.getName());
+        assertEquals(new BigDecimal("500"), result.getMonthlyActualAmt());
+
+        verify(repository, times(1)).findById(1L);
+        verify(repository, times(1)).save(any(DcSupportDeductions.class));
+    }
+
+    @Test
+    public void testUpdate_NotFound() {
+        DcSupportDeductionsRequestDTO requestDTO = new DcSupportDeductionsRequestDTO(
+                101L, "John Doe", new Date(), new Date(), new Date(), new Date(), "EXP001",
+                new BigDecimal("500"), "Verified", new Date(), new Date(), new Date());
+
+        when(repository.findById(1L)).thenReturn(Optional.empty());
+
+        DcSupportDeductionsResponseDTO result = service.update(1L, requestDTO);
+
+        assertNull(result);
+        verify(repository, times(1)).findById(1L);
+        verify(repository, times(0)).save(any(DcSupportDeductions.class));
+    }
+
+    @Test
+    public void testDeleteById() {
+        doNothing().when(repository).deleteById(1L);
+
+        service.deleteById(1L);
+
+        verify(repository, times(1)).deleteById(1L);
     }
 }

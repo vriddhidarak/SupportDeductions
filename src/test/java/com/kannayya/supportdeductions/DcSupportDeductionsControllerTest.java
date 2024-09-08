@@ -1,134 +1,150 @@
 package com.kannayya.supportdeductions;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import com.kannayya.supportdeductions.controller.DcSupportDeductionsController;
-import com.kannayya.supportdeductions.dto.DcSupportDeductionsGetAllDTO;
-import com.kannayya.supportdeductions.dto.DcSupportDeductionsRequestDTO;
-import com.kannayya.supportdeductions.dto.DcSupportDeductionsResponseDTO;
-import com.kannayya.supportdeductions.exceptions.ResourceNotFoundException;
-import com.kannayya.supportdeductions.service.DcSupportDeductionsServiceImpl;
+import com.kannayya.supportdeductions.dto.*;
+import com.kannayya.supportdeductions.service.DcSupportDeductionsService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-@SpringJUnitConfig
- class DcSupportDeductionsControllerTest {
+class DcSupportDeductionsControllerTest {
 
     @Mock
-    private DcSupportDeductionsServiceImpl service;
+    private DcSupportDeductionsService service;
 
     @InjectMocks
     private DcSupportDeductionsController controller;
 
-    public DcSupportDeductionsControllerTest() {
+    private MockMvc mockMvc;
+    private ObjectMapper objectMapper = new ObjectMapper();
+
+    @BeforeEach
+    public void setup() {
         MockitoAnnotations.openMocks(this);
+        mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
     }
 
     @Test
-    void testGetAllDeductions() {
-        LocalDateTime now = LocalDateTime.now();
-        DcSupportDeductionsGetAllDTO dto = new DcSupportDeductionsGetAllDTO(now, now, 1L, "John Doe", BigDecimal.valueOf(1000.00));
-        when(service.findAll()).thenReturn(Collections.singletonList(dto));
+    public void testGetAllDeductions() throws Exception {
+        List<DcSupportDeductionsGetAllDTO> deductionsList = Arrays.asList(
+                new DcSupportDeductionsGetAllDTO(LocalDateTime.now(), LocalDateTime.now(), 1L, "John Doe", new BigDecimal("500")),
+                new DcSupportDeductionsGetAllDTO(LocalDateTime.now(), LocalDateTime.now(), 2L, "Jane Doe", new BigDecimal("600"))
+        );
 
-        ResponseEntity<List<DcSupportDeductionsGetAllDTO>> response = controller.getAllDeductions();
+        when(service.findAll()).thenReturn(deductionsList);
 
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertEquals(1, response.getBody().size());
-        assertEquals("John Doe", response.getBody().get(0).getName());
+        mockMvc.perform(get("/api/deductions")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].name").value("John Doe"))
+                .andExpect(jsonPath("$[1].name").value("Jane Doe"));
+
+        verify(service, times(1)).findAll();
     }
 
     @Test
-    void testGetDeductionByIdSuccess() {
-        LocalDateTime now = LocalDateTime.now();
-        DcSupportDeductionsResponseDTO dto = new DcSupportDeductionsResponseDTO(now, now, 1L, "John Doe", BigDecimal.valueOf(1000.00));
-        when(service.findById(1L)).thenReturn(Optional.of(dto));
+    public void testGetDeductionById_Found() throws Exception {
+        DcSupportDeductionsResponseDTO responseDTO = new DcSupportDeductionsResponseDTO(
+                LocalDateTime.now(), LocalDateTime.now(), 1L, "John Doe", new BigDecimal("500"));
 
-        ResponseEntity<DcSupportDeductionsResponseDTO> response = controller.getDeductionById(1L);
+        when(service.findById(1L)).thenReturn(Optional.of(responseDTO));
 
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(dto, response.getBody());
+        mockMvc.perform(get("/api/deductions/1")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("John Doe"));
+
+        verify(service, times(1)).findById(1L);
     }
 
     @Test
-    void testGetDeductionByIdNotFound() {
+    public void testGetDeductionById_NotFound() throws Exception {
         when(service.findById(1L)).thenReturn(Optional.empty());
 
-        ResourceNotFoundException thrown = assertThrows(ResourceNotFoundException.class, () -> {
-            controller.getDeductionById(1L);
-        });
+        mockMvc.perform(get("/api/deductions/1")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
 
-        assertEquals("Deduction not found with ID: 1", thrown.getMessage());
+        verify(service, times(1)).findById(1L);
     }
 
     @Test
-    void testCreateDeduction() {
-        LocalDateTime now = LocalDateTime.now();
-        DcSupportDeductionsRequestDTO requestDTO = new DcSupportDeductionsRequestDTO("John Doe", BigDecimal.valueOf(1000.00));
-        DcSupportDeductionsResponseDTO responseDTO = new DcSupportDeductionsResponseDTO(now, now, 1L, "John Doe", BigDecimal.valueOf(1000.00));
+    public void testCreateDeduction() throws Exception {
+        DcSupportDeductionsRequestDTO requestDTO = new DcSupportDeductionsRequestDTO(
+                1L, "John Doe", new Date(), new Date(), new Date(), new Date(),
+                "EXP001", new BigDecimal("500"), "Verified", new Date(), new Date(), new Date());
+        DcSupportDeductionsResponseDTO responseDTO = new DcSupportDeductionsResponseDTO(
+                LocalDateTime.now(), LocalDateTime.now(), 1L, "John Doe", new BigDecimal("500"));
+
         when(service.save(any(DcSupportDeductionsRequestDTO.class))).thenReturn(responseDTO);
 
-        ResponseEntity<DcSupportDeductionsResponseDTO> response = controller.createDeduction(requestDTO);
+        mockMvc.perform(post("/api/deductions")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestDTO)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("John Doe"))
+                .andExpect(jsonPath("$.monthlyActualAmt").value(500));
 
-        assertEquals(HttpStatus.CREATED, response.getStatusCode());
-        assertEquals(responseDTO, response.getBody());
+        verify(service, times(1)).save(any(DcSupportDeductionsRequestDTO.class));
     }
 
     @Test
-    void testUpdateDeductionSuccess() {
-        LocalDateTime now = LocalDateTime.now();
-        DcSupportDeductionsRequestDTO requestDTO = new DcSupportDeductionsRequestDTO("Jane Doe", BigDecimal.valueOf(2000.00));
-        DcSupportDeductionsResponseDTO responseDTO = new DcSupportDeductionsResponseDTO(now, now, 1L, "Jane Doe", BigDecimal.valueOf(2000.00));
+    public void testUpdateDeduction_Success() throws Exception {
+        DcSupportDeductionsRequestDTO requestDTO = new DcSupportDeductionsRequestDTO(
+                1L, "John Doe", new Date(), new Date(), new Date(), new Date(),
+                "EXP001", new BigDecimal("500"), "Verified", new Date(), new Date(), new Date());
+        DcSupportDeductionsResponseDTO responseDTO = new DcSupportDeductionsResponseDTO(
+                LocalDateTime.now(), LocalDateTime.now(), 1L, "John Doe", new BigDecimal("500"));
+
         when(service.update(eq(1L), any(DcSupportDeductionsRequestDTO.class))).thenReturn(responseDTO);
 
-        ResponseEntity<DcSupportDeductionsResponseDTO> response = controller.updateDeduction(1L, requestDTO);
+        mockMvc.perform(put("/api/deductions/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestDTO)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("John Doe"));
 
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(responseDTO, response.getBody());
+        verify(service, times(1)).update(eq(1L), any(DcSupportDeductionsRequestDTO.class));
     }
 
     @Test
-   void testUpdateDeductionNotFound() {
-        DcSupportDeductionsRequestDTO requestDTO = new DcSupportDeductionsRequestDTO("Jane Doe", BigDecimal.valueOf(2000.00));
-        when(service.update(eq(1L), any(DcSupportDeductionsRequestDTO.class))).thenThrow(new ResourceNotFoundException("Deduction not found with ID: 1"));
+    public void testUpdateDeduction_NotFound() throws Exception {
+        DcSupportDeductionsRequestDTO requestDTO = new DcSupportDeductionsRequestDTO(
+                1L, "John Doe", new Date(), new Date(), new Date(), new Date(),
+                "EXP001", new BigDecimal("500"), "Verified", new Date(), new Date(), new Date());
 
-        ResourceNotFoundException thrown = assertThrows(ResourceNotFoundException.class, () -> {
-            controller.updateDeduction(1L, requestDTO);
-        });
+        when(service.update(eq(1L), any(DcSupportDeductionsRequestDTO.class))).thenReturn(null);
 
-        assertEquals("Deduction not found with ID: 1", thrown.getMessage());
+        mockMvc.perform(put("/api/deductions/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(requestDTO)))
+                .andExpect(status().isNotFound());
+
+        verify(service, times(1)).update(eq(1L), any(DcSupportDeductionsRequestDTO.class));
     }
 
     @Test
-    void testDeleteDeductionSuccess() {
+    public void testDeleteDeduction() throws Exception {
         doNothing().when(service).deleteById(1L);
 
-        ResponseEntity<Void> response = controller.deleteDeduction(1L);
+        mockMvc.perform(delete("/api/deductions/1")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNoContent());
 
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals("Deduction deleted successfully with ID: 1", response.getBody());
-    }
-
-    @Test
-    void testDeleteDeductionNotFound() {
-        doThrow(new ResourceNotFoundException("Deduction not found with ID: 1")).when(service).deleteById(1L);
-
-        ResourceNotFoundException thrown = assertThrows(ResourceNotFoundException.class, () -> {
-            controller.deleteDeduction(1L);
-        });
-
-        assertEquals("Deduction not found with ID: 1", thrown.getMessage());
+        verify(service, times(1)).deleteById(1L);
     }
 }
