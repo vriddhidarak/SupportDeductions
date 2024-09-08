@@ -12,13 +12,12 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-public class DcSupportDeductionsServiceImplTest {
+class DcSupportDeductionsServiceImplTest {
 
     @Mock
     private DcSupportDeductionsRepository repository;
@@ -32,7 +31,7 @@ public class DcSupportDeductionsServiceImplTest {
     }
 
     @Test
-    public void testFindAll() {
+    void testFindAll() {
         List<DcSupportDeductions> deductionsList = Arrays.asList(
                 new DcSupportDeductions(1L, 101L, "John Doe", new Date(), new Date(), new Date(), new Date(), "EXP001", new BigDecimal("500"), "Verified", new Date(), new Date(), new Date()),
                 new DcSupportDeductions(2L, 102L, "Jane Doe", new Date(), new Date(), new Date(), new Date(), "EXP002", new BigDecimal("600"), "Verified", new Date(), new Date(), new Date())
@@ -51,7 +50,7 @@ public class DcSupportDeductionsServiceImplTest {
     }
 
     @Test
-    public void testFindById_Found() {
+      void testFindById_Found() {
         DcSupportDeductions entity = new DcSupportDeductions(1L, 101L, "John Doe", new Date(), new Date(), new Date(), new Date(), "EXP001", new BigDecimal("500"), "Verified", new Date(), new Date(), new Date());
 
         when(repository.findById(1L)).thenReturn(Optional.of(entity));
@@ -66,7 +65,7 @@ public class DcSupportDeductionsServiceImplTest {
     }
 
     @Test
-    public void testFindById_NotFound() {
+      void testFindById_NotFound() {
         when(repository.findById(1L)).thenReturn(Optional.empty());
 
         Optional<DcSupportDeductionsResponseDTO> result = service.findById(1L);
@@ -76,11 +75,10 @@ public class DcSupportDeductionsServiceImplTest {
     }
 
     @Test
-    public void testSave() {
+      void testSave() {
         DcSupportDeductionsRequestDTO requestDTO = new DcSupportDeductionsRequestDTO(
                 101L, "John Doe", new Date(), new Date(), new Date(), new Date(), "EXP001",
                 new BigDecimal("500"), "Verified", new Date(), new Date(), new Date());
-        DcSupportDeductions entity = requestDTO.toEntity();
 
         DcSupportDeductions savedEntity = new DcSupportDeductions(1L, 101L, "John Doe", new Date(), new Date(), new Date(), new Date(), "EXP001", new BigDecimal("500"), "Verified", new Date(), new Date(), new Date());
 
@@ -96,7 +94,7 @@ public class DcSupportDeductionsServiceImplTest {
     }
 
     @Test
-    public void testUpdate_Success() {
+      void testUpdate_Success() {
         DcSupportDeductionsRequestDTO requestDTO = new DcSupportDeductionsRequestDTO(
                 101L, "John Doe", new Date(), new Date(), new Date(), new Date(), "EXP001",
                 new BigDecimal("500"), "Verified", new Date(), new Date(), new Date());
@@ -116,7 +114,7 @@ public class DcSupportDeductionsServiceImplTest {
     }
 
     @Test
-    public void testUpdate_NotFound() {
+      void testUpdate_NotFound() {
         DcSupportDeductionsRequestDTO requestDTO = new DcSupportDeductionsRequestDTO(
                 101L, "John Doe", new Date(), new Date(), new Date(), new Date(), "EXP001",
                 new BigDecimal("500"), "Verified", new Date(), new Date(), new Date());
@@ -131,7 +129,7 @@ public class DcSupportDeductionsServiceImplTest {
     }
 
     @Test
-    public void testDeleteById() {
+      void testDeleteById() {
         doNothing().when(repository).deleteById(1L);
 
         service.deleteById(1L);

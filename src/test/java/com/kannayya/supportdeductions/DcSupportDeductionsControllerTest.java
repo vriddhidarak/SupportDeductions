@@ -39,7 +39,7 @@ class DcSupportDeductionsControllerTest {
     }
 
     @Test
-    public void testGetAllDeductions() throws Exception {
+      void testGetAllDeductions() throws Exception {
         List<DcSupportDeductionsGetAllDTO> deductionsList = Arrays.asList(
                 new DcSupportDeductionsGetAllDTO(LocalDateTime.now(), LocalDateTime.now(), 1L, "John Doe", new BigDecimal("500")),
                 new DcSupportDeductionsGetAllDTO(LocalDateTime.now(), LocalDateTime.now(), 2L, "Jane Doe", new BigDecimal("600"))
@@ -57,7 +57,7 @@ class DcSupportDeductionsControllerTest {
     }
 
     @Test
-    public void testGetDeductionById_Found() throws Exception {
+      void testGetDeductionById_Found() throws Exception {
         DcSupportDeductionsResponseDTO responseDTO = new DcSupportDeductionsResponseDTO(
                 LocalDateTime.now(), LocalDateTime.now(), 1L, "John Doe", new BigDecimal("500"));
 
@@ -72,7 +72,7 @@ class DcSupportDeductionsControllerTest {
     }
 
     @Test
-    public void testGetDeductionById_NotFound() throws Exception {
+      void testGetDeductionById_NotFound() throws Exception {
         when(service.findById(1L)).thenReturn(Optional.empty());
 
         mockMvc.perform(get("/api/deductions/1")
@@ -83,7 +83,7 @@ class DcSupportDeductionsControllerTest {
     }
 
     @Test
-    public void testCreateDeduction() throws Exception {
+      void testCreateDeduction() throws Exception {
         DcSupportDeductionsRequestDTO requestDTO = new DcSupportDeductionsRequestDTO(
                 1L, "John Doe", new Date(), new Date(), new Date(), new Date(),
                 "EXP001", new BigDecimal("500"), "Verified", new Date(), new Date(), new Date());
@@ -103,7 +103,7 @@ class DcSupportDeductionsControllerTest {
     }
 
     @Test
-    public void testUpdateDeduction_Success() throws Exception {
+      void testUpdateDeduction_Success() throws Exception {
         DcSupportDeductionsRequestDTO requestDTO = new DcSupportDeductionsRequestDTO(
                 1L, "John Doe", new Date(), new Date(), new Date(), new Date(),
                 "EXP001", new BigDecimal("500"), "Verified", new Date(), new Date(), new Date());
@@ -122,7 +122,7 @@ class DcSupportDeductionsControllerTest {
     }
 
     @Test
-    public void testUpdateDeduction_NotFound() throws Exception {
+      void testUpdateDeduction_NotFound() throws Exception {
         DcSupportDeductionsRequestDTO requestDTO = new DcSupportDeductionsRequestDTO(
                 1L, "John Doe", new Date(), new Date(), new Date(), new Date(),
                 "EXP001", new BigDecimal("500"), "Verified", new Date(), new Date(), new Date());
@@ -138,7 +138,7 @@ class DcSupportDeductionsControllerTest {
     }
 
     @Test
-    public void testDeleteDeduction() throws Exception {
+      void testDeleteDeduction() throws Exception {
         doNothing().when(service).deleteById(1L);
 
         mockMvc.perform(delete("/api/deductions/1")
