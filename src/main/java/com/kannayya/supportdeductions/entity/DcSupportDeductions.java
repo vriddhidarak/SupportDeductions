@@ -6,7 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDate;
 
 @Entity
 @Data
@@ -26,17 +26,17 @@ public class DcSupportDeductions {
     @Column(name = "name", nullable = false, length = 100) // Varchar(100), Not Null
     private String name;
 
-    @Column(name = "eff_begin_dt", nullable = false) // Date, Not Null
-    private Date effBeginDt;
+    @Column(name = "eff_begin_dt", nullable = false) // LocalDate, Not Null
+    private LocalDate effBeginDt;
 
-    @Column(name = "eff_end_dt") // Date
-    private Date effEndDt;
+    @Column(name = "eff_end_dt") // LocalDate
+    private LocalDate effEndDt;
 
-    @Column(name = "reported_dt") // Date
-    private Date reportedDt;
+    @Column(name = "reported_dt") // LocalDate
+    private LocalDate reportedDt;
 
-    @Column(name = "client_aware_dt") // Date
-    private Date clientAwareDt;
+    @Column(name = "client_aware_dt") // LocalDate
+    private LocalDate clientAwareDt;
 
     @Column(name = "expense_type_cd", length = 5) // Varchar(5)
     private String expenseTypeCd;
@@ -47,13 +47,13 @@ public class DcSupportDeductions {
     @Column(name = "exp_amt_verf", length = 5) // Varchar(5)
     private String expAmtVerf;
 
-    @Column(name = "final_expense_dt") // Date
-    private Date finalExpenseDt;
+    @Column(name = "final_expense_dt") // LocalDate
+    private LocalDate finalExpenseDt;
 
     @Column(name = "create_dt") // Timestamp without time zone
-    private Date createDt;
+    private LocalDate createDt;
 
-    @Column(name = "update_dt") // Timestamp without time zone
-    private Date updateDt;
+    @Column(name = "upLocalDate_dt") // Timestamp without time zone
+    private LocalDate upLocalDateDt;
 
 }

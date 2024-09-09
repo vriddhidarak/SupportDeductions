@@ -5,8 +5,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Date;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -22,13 +22,13 @@ public class DcSupportDeductionsResponseDTO {
 
     private String name;
 
-    private Date effBeginDt;
+    private LocalDate effBeginDt;
 
-    private Date effEndDt;
+    private LocalDate effEndDt;
 
-    private Date reportedDt;
+    private LocalDate reportedDt;
 
-    private Date clientAwareDt;
+    private LocalDate clientAwareDt;
 
     private String expenseTypeCd;
 
@@ -36,11 +36,11 @@ public class DcSupportDeductionsResponseDTO {
 
     private String expAmtVerf;
 
-    private Date finalExpenseDt;
+    private LocalDate finalExpenseDt;
 
-    private Date createDt;
+    private LocalDate createDt;
 
-    private Date updateDt;
+    private LocalDate upLocalDateDt;
 
     public DcSupportDeductionsResponseDTO(LocalDateTime now, LocalDateTime now1, long l, String janeDoe, BigDecimal bigDecimal) {
         this.requestTimeStamp = now;
@@ -67,7 +67,7 @@ public class DcSupportDeductionsResponseDTO {
             entity.getExpAmtVerf(),
             entity.getFinalExpenseDt(),
             entity.getCreateDt(),
-            entity.getUpdateDt()
+            entity.getUpLocalDateDt()
         );
     }
 
